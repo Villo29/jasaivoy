@@ -1,128 +1,111 @@
 import 'package:flutter/material.dart';
+import 'package:jasaivoy/pages/login.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const SplashApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class SplashApp extends StatelessWidget {
+  const SplashApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Login Screen',
+      title: 'Jasai Voy',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const LoginScreen(),
+      home: const SplashScreen(),
     );
   }
 }
 
-class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
+
+  @override
+  _SplashScreenState createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Espera 3 segundos y luego navega a la pantalla de Home (o a cualquier otra parte de tu app)
+    Future.delayed(const Duration(seconds: 3), () {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+      );
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+      backgroundColor: Colors.white,
+      body: Center(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            Image.asset(
+              'assets/logo.png', // Asegúrate de tener la imagen en esta ruta
+              height: 100,
+            ),
+            const SizedBox(height: 20),
             const Text(
-              'Login',
+              'Jasai Voy',
               style: TextStyle(
-                fontSize: 36,
+                fontSize: 40,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 40),
-            // Email Field
-            const TextField(
-              decoration: InputDecoration(
-                prefixIcon: Icon(Icons.email_outlined, color: Colors.red),
-                labelText: 'Correo',
-                border: UnderlineInputBorder(),
-              ),
+            const Text(
+              'Viajes seguro y fácil',
+              style: TextStyle(fontSize: 16, color: Colors.grey),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// Pantalla principal (después de la bienvenida)
+class HomeScreen extends StatelessWidget {
+  const HomeScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Jasai Voy - Home'),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              'Bienvenido a Jasai Voy',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
-            // Password Field
-            const TextField(
-              obscureText: true,
-              decoration: InputDecoration(
-                prefixIcon: Icon(Icons.lock_outline, color: Colors.red),
-                labelText: 'Contraseña',
-                suffixIcon: Icon(Icons.visibility_off_outlined),
-                border: UnderlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 10),
-            // Forgot Password
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton(
-                onPressed: () {
-                  // Acción para olvidar contraseña
-                },
-                child: const Text(
-                  '¿Has olvidado tu contraseña?',
-                  style: TextStyle(color: Colors.red),
-                ),
-              ),
-            ),
-            const SizedBox(height: 30),
-            // Login Button
             ElevatedButton(
               onPressed: () {
-                // Acción para iniciar sesión
+                // Aquí navegas a la pantalla de login
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LoginScreen()), // Debe referirse al login si lo integras
+                );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.lightGreenAccent, // Color del botón
-                minimumSize: const Size(double.infinity, 50), // Tamaño del botón
+                minimumSize: const Size(200, 50), // Tamaño del botón
               ),
               child: const Text(
-                'Iniciar sesión',
-                style: TextStyle(color: Colors.grey),
+                'Ir al Login',
+                style: TextStyle(color: Colors.black),
               ),
-            ),
-            const SizedBox(height: 20),
-            // Registration Links
-            const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('Pasajero?'),
-                SizedBox(width: 5),
-                Text(
-                  'Registrate',
-                  style: TextStyle(color: Colors.red),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('Conductor?'),
-                SizedBox(width: 5),
-                Text(
-                  'Registrate',
-                  style: TextStyle(color: Colors.red),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            // OR Divider
-            const Row(
-              children: [
-                Expanded(child: Divider()),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 8.0),
-                  child: Text('O'),
-                ),
-                Expanded(child: Divider()),
-              ],
             ),
           ],
         ),
