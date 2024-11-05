@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:jasaivoy/pages/home.dart';
+import 'package:jasaivoy/main.dart';
+import 'package:jasaivoy/pages/pasajero.dart';
 
 void main() {
   runApp(const LoginApp());
@@ -27,7 +28,7 @@ class LoginScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Iniciar Sesión'),
+        title: const Text('Login'),
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -36,23 +37,28 @@ class LoginScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Text(
-              'Iniciar sesión',
+              'Login',
               style: TextStyle(
                 fontSize: 36,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 40),
-            // Campo de correo
-            const TextField(
+            TextField(
               decoration: InputDecoration(
-                prefixIcon: Icon(Icons.email_outlined, color: Colors.red),
+                prefixIcon: Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Image.asset(
+                    'assets/arrobaCorreo.png',
+                    width: 20,
+                    height: 20,
+                  ),
+                ),
                 labelText: 'Correo',
-                border: UnderlineInputBorder(),
+                border: const UnderlineInputBorder(),
               ),
             ),
             const SizedBox(height: 20),
-            // Campo de contraseña
             const TextField(
               obscureText: true,
               decoration: InputDecoration(
@@ -63,15 +69,14 @@ class LoginScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 10),
-            // Opción de contraseña olvidada
             Align(
               alignment: Alignment.centerRight,
               child: TextButton(
                 onPressed: () {
-                  // Acción para recuperar contraseña
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const ForgotPasswordScreen()),
+                    MaterialPageRoute(
+                        builder: (context) => const ForgotPasswordScreen()),
                   );
                 },
                 child: const Text(
@@ -81,18 +86,17 @@ class LoginScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 30),
-            // Botón de iniciar sesión
             ElevatedButton(
               onPressed: () {
-                // Acción para iniciar sesión
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const SplashScreen()),
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.lightGreenAccent, // Color del botón
-                minimumSize: const Size(double.infinity, 50), // Tamaño del botón
+                backgroundColor:
+                    const Color.fromARGB(255, 197, 251, 246),
+                minimumSize: const Size(double.infinity, 50),
               ),
               child: const Text(
                 'Iniciar sesión',
@@ -100,50 +104,28 @@ class LoginScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            // Enlaces de registro
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text('Pasajero?'),
+                const Text('¿Pasajero?'),
                 const SizedBox(width: 5),
                 TextButton(
                   onPressed: () {
-                    // Acción para registro de pasajero
+                    // Aquí llamamos la vista de registro de pasajero
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const RegisterPassengerScreen()),
+                      MaterialPageRoute(
+                        builder: (context) => PassengerRegistrationScreen(),
+                      ),
                     );
                   },
                   child: const Text(
-                    'Registrate',
+                    'Regístrate',
                     style: TextStyle(color: Colors.red),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text('Conductor?'),
-                const SizedBox(width: 5),
-                TextButton(
-                  onPressed: () {
-                    // Acción para registro de conductor
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const RegisterDriverScreen()),
-                    );
-                  },
-                  child: const Text(
-                    'Registrate',
-                    style: TextStyle(color: Colors.red),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            // Separador
             const Row(
               children: [
                 Expanded(child: Divider()),
@@ -154,6 +136,28 @@ class LoginScreen extends StatelessWidget {
                 Expanded(child: Divider()),
               ],
             ),
+            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text('¿Conductor?'),
+                const SizedBox(width: 5),
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              const RegisterDriverScreen()),
+                    );
+                  },
+                  child: const Text(
+                    'Regístrate',
+                    style: TextStyle(color: Colors.red),
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),
@@ -161,7 +165,6 @@ class LoginScreen extends StatelessWidget {
   }
 }
 
-// Pantalla de recuperación de contraseña
 class ForgotPasswordScreen extends StatelessWidget {
   const ForgotPasswordScreen({super.key});
 
@@ -178,24 +181,19 @@ class ForgotPasswordScreen extends StatelessWidget {
   }
 }
 
-// Pantalla de registro de pasajero
-class RegisterPassengerScreen extends StatelessWidget {
-  const RegisterPassengerScreen({super.key});
+class SplashScreen extends StatelessWidget {
+  const SplashScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Registro Pasajero'),
-      ),
-      body: const Center(
-        child: Text('Pantalla de registro para pasajeros'),
+      body: Center(
+        child: Text('Splash Screen'),
       ),
     );
   }
 }
 
-// Pantalla de registro de conductor
 class RegisterDriverScreen extends StatelessWidget {
   const RegisterDriverScreen({super.key});
 
