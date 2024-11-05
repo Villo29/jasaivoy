@@ -3,6 +3,8 @@ import 'package:jasaivoy/pages/JasaiVoyViajes.dart';
 import 'package:jasaivoy/pages/InformacionPasajeros.dart';
 
 class ViajesRegistradosScreen extends StatefulWidget {
+  const ViajesRegistradosScreen({super.key});
+
   @override
   _ViajesRegistradosScreenState createState() => _ViajesRegistradosScreenState();
 }
@@ -30,12 +32,12 @@ class _ViajesRegistradosScreenState extends State<ViajesRegistradosScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: Text(
+        title: const Text(
           'Viajes registrados',
           style: TextStyle(color: Colors.black),
         ),
         centerTitle: true,
-        actions: [
+        actions: const [
           CircleAvatar(
             backgroundImage: AssetImage('assets/ImagenPasajero.png'),
             radius: 20,
@@ -56,7 +58,7 @@ class _ViajesRegistradosScreenState extends State<ViajesRegistradosScreen> {
               hora: '14:00',
               precio: 10.00,
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             _buildTravelCard(
               context,
               title: 'Parque Sta Anita-Mercado',
@@ -66,7 +68,7 @@ class _ViajesRegistradosScreenState extends State<ViajesRegistradosScreen> {
               hora: '14:00',
               precio: 20.00,
             ),
-            Spacer(),
+            const Spacer(),
             Center(
               child: ElevatedButton.icon(
                 onPressed: () {
@@ -75,12 +77,12 @@ class _ViajesRegistradosScreenState extends State<ViajesRegistradosScreen> {
                     MaterialPageRoute(builder: (context) => HomeScreen()),
                   );
                 },
-                icon: Icon(Icons.add, color: Colors.black),
+                icon: const Icon(Icons.add, color: Colors.black),
                 label:
-                    Text('Nuevo viaje', style: TextStyle(color: Colors.black)),
+                    const Text('Nuevo viaje', style: TextStyle(color: Colors.black)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.lightBlueAccent.withOpacity(0.3),
-                  padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),
@@ -152,30 +154,30 @@ class _ViajesRegistradosScreenState extends State<ViajesRegistradosScreen> {
           children: [
             Text(
               title,
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
-            SizedBox(height: 5),
+            const SizedBox(height: 5),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Origen', style: TextStyle(color: Colors.grey)),
-                    Text(origen, style: TextStyle(color: Colors.red)),
+                    const Text('Origen', style: TextStyle(color: Colors.grey)),
+                    Text(origen, style: const TextStyle(color: Colors.red)),
                   ],
                 ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text('Destino', style: TextStyle(color: Colors.grey)),
-                    Text(destino, style: TextStyle(color: Colors.red)),
+                    const Text('Destino', style: TextStyle(color: Colors.grey)),
+                    Text(destino, style: const TextStyle(color: Colors.red)),
                   ],
                 ),
               ],
             ),
-            SizedBox(height: 10),
-            Row(
+            const SizedBox(height: 10),
+            const Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text('Fecha', style: TextStyle(color: Colors.grey)),
@@ -185,17 +187,17 @@ class _ViajesRegistradosScreenState extends State<ViajesRegistradosScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(fecha, style: TextStyle(color: Colors.red)),
-                Text(hora, style: TextStyle(color: Colors.red)),
+                Text(fecha, style: const TextStyle(color: Colors.red)),
+                Text(hora, style: const TextStyle(color: Colors.red)),
               ],
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Text(
                   '\$ ${precio.toStringAsFixed(2)}',
-                  style: TextStyle(
+                  style: const TextStyle(
                       color: Colors.red,
                       fontWeight: FontWeight.bold,
                       fontSize: 18),

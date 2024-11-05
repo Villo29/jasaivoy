@@ -9,6 +9,8 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -19,6 +21,8 @@ class MyApp extends StatelessWidget {
 }
 
 class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
@@ -46,7 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _startLatLng = LatLng(currentLocation.latitude!, currentLocation.longitude!);
       _startMarker = Marker(
-        markerId: MarkerId('start'),
+        markerId: const MarkerId('start'),
         position: _startLatLng!,
         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
       );
@@ -63,7 +67,7 @@ class _HomeScreenState extends State<HomeScreen> {
       if (isStartLocation) {
         _startLatLng = latLng;
         _startMarker = Marker(
-          markerId: MarkerId('start'),
+          markerId: const MarkerId('start'),
           position: latLng,
           icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
         );
@@ -71,7 +75,7 @@ class _HomeScreenState extends State<HomeScreen> {
       } else {
         _destinationLatLng = latLng;
         _destinationMarker = Marker(
-          markerId: MarkerId('destination'),
+          markerId: const MarkerId('destination'),
           position: latLng,
           icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
         );
@@ -88,7 +92,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _getRoutePolyline() async {
     if (_startLatLng == null || _destinationLatLng == null) return;
 
-    final apiKey = "AIzaSyABT2XqfABLKZHWlxg_IF412hYYOqZWYAk"; // Cambia esto por tu clave
+    const apiKey = "AIzaSyABT2XqfABLKZHWlxg_IF412hYYOqZWYAk";
     final url = Uri.parse(
       "https://maps.googleapis.com/maps/api/directions/json?origin=${_startLatLng!.latitude},${_startLatLng!.longitude}&destination=${_destinationLatLng!.latitude},${_destinationLatLng!.longitude}&key=$apiKey",
     );
@@ -102,7 +106,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
         setState(() {
           _routePolyline = Polyline(
-            polylineId: PolylineId("route"),
+            polylineId: const PolylineId("route"),
             points: polylineCoordinates,
             color: Colors.blue,
             width: 5,
@@ -118,7 +122,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _getAddressFromLatLng(LatLng latLng, bool isStartLocation) async {
-    final apiKey = "AIzaSyABT2XqfABLKZHWlxg_IF412hYYOqZWYAk"; // Cambia esto por tu clave
+    const apiKey = "AIzaSyABT2XqfABLKZHWlxg_IF412hYYOqZWYAk"; // Cambia esto por tu clave
     final url = Uri.parse(
       "https://maps.googleapis.com/maps/api/geocode/json?latlng=${latLng.latitude},${latLng.longitude}&key=$apiKey",
     );
@@ -188,10 +192,10 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.menu, color: Colors.black),
+          icon: const Icon(Icons.menu, color: Colors.black),
           onPressed: () {},
         ),
-        actions: [
+        actions: const [
           CircleAvatar(
             backgroundImage: AssetImage('assets/perfilFoto.png'),
           ),
@@ -206,7 +210,7 @@ class _HomeScreenState extends State<HomeScreen> {
             TextField(
               controller: startController,
               decoration: InputDecoration(
-                prefixIcon: Icon(Icons.location_on, color: Colors.red),
+                prefixIcon: const Icon(Icons.location_on, color: Colors.red),
                 hintText: 'Seleccione en el mapa su ubicación',
                 filled: true,
                 fillColor: Colors.grey[200],
@@ -216,11 +220,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             TextField(
               controller: destinationController,
               decoration: InputDecoration(
-                prefixIcon: Icon(Icons.search, color: Colors.red),
+                prefixIcon: const Icon(Icons.search, color: Colors.red),
                 hintText: 'Seleccione en el mapa su destino',
                 filled: true,
                 fillColor: Colors.grey[200],
@@ -230,12 +234,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Expanded(
               child: GoogleMap(
                 onMapCreated: _onMapCreated,
                 initialCameraPosition: CameraPosition(
-                  target: _startLatLng ?? LatLng(16.621537, -93.099800),
+                  target: _startLatLng ?? const LatLng(16.621537, -93.099800),
                   zoom: 14.0,
                 ),
                 myLocationEnabled: true,
@@ -254,16 +258,16 @@ class _HomeScreenState extends State<HomeScreen> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         ListTile(
-                          leading: Icon(Icons.location_on),
-                          title: Text('Establecer como ubicación inicial'),
+                          leading: const Icon(Icons.location_on),
+                          title: const Text('Establecer como ubicación inicial'),
                           onTap: () {
                             Navigator.pop(context);
                             _selectLocation(latLng, true);
                           },
                         ),
                         ListTile(
-                          leading: Icon(Icons.location_on_outlined),
-                          title: Text('Establecer como destino'),
+                          leading: const Icon(Icons.location_on_outlined),
+                          title: const Text('Establecer como destino'),
                           onTap: () {
                             Navigator.pop(context);
                             _selectLocation(latLng, false);
