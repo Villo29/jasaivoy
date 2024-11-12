@@ -5,20 +5,20 @@ import 'package:jasaivoy/pages/models/user_model.dart';
 
 class AuthModel extends ChangeNotifier {
   bool _isLoggedIn = false;
+  bool _isVerified = false;
   String _token = '';
   String _userId = '';
   UserModel? _currentUser;
 
   UserModel? get currentUser => _currentUser;
-  String get token => _token;  // Getter para token
-  String get userId => _userId;  // Getter para userId
-
-  AuthModel();
-
+  String get token => _token;
+  String get userId => _userId;
   bool get isLoggedIn => _isLoggedIn;
+  bool get isVerified => _isVerified;
 
+  // Método de login solo para verificar credenciales
   Future<void> login(String correo, String contrasena) async {
-    var url = Uri.parse('http://67.202.4.38:3000/api/usuarios/login');
+    var url = Uri.parse('http://34.231.108.121:3028/api/v1/users/login');
     var response = await http.post(
       url,
       headers: {
@@ -31,84 +31,50 @@ class AuthModel extends ChangeNotifier {
     );
 
     if (response.statusCode == 200) {
-      var data = json.decode(response.body);
-      _token = data['token'];
-      _userId = data['usuario']['_id'];
-      _isLoggedIn = true;
-      await fetchUserData();
+      _isLoggedIn = true; // Marca al usuario como logueado solo para seguir al paso de verificación
       notifyListeners();
     } else {
-      throw Exception('Failed to log in');
+      throw Exception('Error al iniciar sesión: ${response.statusCode} - ${response.body}');
     }
   }
 
-  void logout() {
-    _isLoggedIn = false;
-    _token = '';
-    _userId = '';
-    _currentUser = null;
-    notifyListeners();
-  }
-
-  Future<void> fetchUserData() async {
-    var url = Uri.parse('http://67.202.4.38:3000/api/usuarios/${_userId}');
-    var response = await http.get(
+  // Método para verificar el código y obtener los datos completos del usuario
+  Future<void> verifyCode(String codigo, String correo) async {
+    var url = Uri.parse('http://34.231.108.121:3028/api/v1/users/validar-usuario');
+    var response = await http.post(
       url,
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer $_token',
-      },
-    );
-
-    if (response.statusCode == 200) {
-      var userData = json.decode(response.body);
-      _currentUser = UserModel.fromJson(userData);
-      notifyListeners();
-    } else {
-      throw Exception('Failed to load user data');
-    }
-  }
-
-  // Método para actualizar los datos del usuario
-  Future<void> updateUserData(String nombre, String correo, String contrasena, String telefono) async {
-    var url = Uri.parse('http://67.202.4.38:3000/api/usuarios/${_userId}');
-    var response = await http.put(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $_token',
       },
       body: json.encode({
-        'nombre': nombre,
         'correo': correo,
-        'contrasena': contrasena,
-        'telefono': telefono
+        'codigoVerificacion': codigo,
       }),
     );
 
     if (response.statusCode == 200) {
-      await fetchUserData(); // Refrescar los datos del usuario
-      notifyListeners();
-    } else {
-      throw Exception('Failed to update user data');
-    }
-  }
+      var data = json.decode(response.body);
 
-  // Método para eliminar la cuenta del usuario
-  Future<void> deleteUser() async {
-    var url = Uri.parse('http://67.202.4.38:3000/api/usuarios/${_userId}');
-    var response = await http.delete(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $_token',
-      },
-    );
+      if (data != null && data['usuario'] != null && data['token'] != null) {
+        var usuario = data['usuario'];
+        _token = data['token'];
+        _userId = usuario['id'].toString();
 
-    if (response.statusCode == 200) {
-      logout(); // Asegúrate de que este método efectivamente limpia los datos del usuario y notifica a los listeners.
+        // Almacena la información completa del usuario
+        _currentUser = UserModel(
+          id: usuario['id'].toString(),
+          nombre: usuario['nombre'],
+          correo: usuario['correo'],
+          telefono: usuario['telefono'],
+        );
+
+        _isVerified = true;
+        notifyListeners();
+      } else {
+        throw Exception('Datos de sesión inválidos: falta el token o los datos del usuario.');
+      }
     } else {
-      throw Exception('Failed to delete user with status: ${response.statusCode}');
+      throw Exception('Error al verificar el código: ${response.statusCode} - ${response.body}');
     }
   }
 }

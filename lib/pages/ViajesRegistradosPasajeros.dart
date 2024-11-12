@@ -17,7 +17,7 @@ class _ViajesRegistradosScreenState extends State<ViajesRegistradosScreen> {
       // Si el índice es 4, navega a la pantalla de perfil
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => ProfileScreen()),
+        MaterialPageRoute(builder: (context) => const ProfileScreen()),
       );
     } else {
       setState(() {
@@ -74,7 +74,7 @@ class _ViajesRegistradosScreenState extends State<ViajesRegistradosScreen> {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => HomeScreen()),
+                    MaterialPageRoute(builder: (context) => const MyApp()),
                   );
                 },
                 icon: const Icon(Icons.add, color: Colors.black),

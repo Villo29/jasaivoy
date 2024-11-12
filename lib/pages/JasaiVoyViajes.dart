@@ -1,11 +1,14 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter/services.dart';
+import 'package:jasaivoy/pages/InformacionPasajeros.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -13,15 +16,17 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: HomeScreen(),
+      home: HomeScreen(token: ''), // Pasa un token aquí para pruebas
     );
   }
 }
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final String token;
+
+  const HomeScreen({super.key, required this.token});
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -39,6 +44,10 @@ class _HomeScreenState extends State<HomeScreen> {
   TextEditingController startController = TextEditingController();
   TextEditingController destinationController = TextEditingController();
 
+  int _selectedIndex = 0;
+
+  final String apiKey = "AIzaSyABT2XqfABLKZHWlxg_IF412hYYOqZWYAk"; // Asegúrate de reemplazar con tu API Key de Google Maps
+
   @override
   void initState() {
     super.initState();
@@ -47,57 +56,67 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _getCurrentLocation() async {
     var currentLocation = await location.getLocation();
-    setState(() {
-      _startLatLng = LatLng(currentLocation.latitude!, currentLocation.longitude!);
-      _startMarker = Marker(
-        markerId: const MarkerId('start'),
-        position: _startLatLng!,
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
-      );
-      startController.text = "${_startLatLng!.latitude}, ${_startLatLng!.longitude}";
-    });
+    _startLatLng = LatLng(currentLocation.latitude!, currentLocation.longitude!);
+    _setMarkerAndAddress(_startLatLng!, startController, isStartLocation: true);
   }
 
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
   }
 
-  void _selectLocation(LatLng latLng, bool isStartLocation) async {
+  Future<void> _setMarkerAndAddress(LatLng position, TextEditingController controller, {required bool isStartLocation}) async {
+    // Actualiza el marcador en el mapa
     setState(() {
       if (isStartLocation) {
-        _startLatLng = latLng;
         _startMarker = Marker(
           markerId: const MarkerId('start'),
-          position: latLng,
+          position: position,
           icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
         );
-        _getAddressFromLatLng(latLng, true); // Obtener dirección para el marcador de inicio
       } else {
-        _destinationLatLng = latLng;
         _destinationMarker = Marker(
           markerId: const MarkerId('destination'),
-          position: latLng,
+          position: position,
           icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
         );
-        _getAddressFromLatLng(latLng, false); // Obtener dirección para el marcador de destino
       }
     });
 
-    // Llama a la función para obtener la ruta si se establecieron ambas ubicaciones
-    if (_startLatLng != null && _destinationLatLng != null) {
-      await _getRoutePolyline();
+    // Obtiene la dirección a partir de las coordenadas
+    String address = await _getAddressFromLatLng(position);
+    setState(() {
+      controller.text = address;
+    });
+  }
+
+  Future<String> _getAddressFromLatLng(LatLng position) async {
+    final url = Uri.parse(
+      "https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.latitude},${position.longitude}&key=$apiKey",
+    );
+
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      if (data['results'].isNotEmpty) {
+        return data['results'][0]['formatted_address'];
+      } else {
+        return "Dirección no disponible";
+      }
+    } else {
+      return "Error al obtener dirección";
     }
   }
 
   Future<void> _getRoutePolyline() async {
     if (_startLatLng == null || _destinationLatLng == null) return;
 
-    const apiKey = "AIzaSyABT2XqfABLKZHWlxg_IF412hYYOqZWYAk";
     final url = Uri.parse(
       "https://maps.googleapis.com/maps/api/directions/json?origin=${_startLatLng!.latitude},${_startLatLng!.longitude}&destination=${_destinationLatLng!.latitude},${_destinationLatLng!.longitude}&key=$apiKey",
     );
 
     final response = await http.get(url);
+
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       if (data['routes'].isNotEmpty) {
@@ -112,46 +131,7 @@ class _HomeScreenState extends State<HomeScreen> {
             width: 5,
           );
         });
-      } else {
-        print("No se encontraron rutas.");
       }
-    } else {
-      print("Error al obtener la ruta: ${response.statusCode}");
-      print("Cuerpo de la respuesta: ${response.body}");
-    }
-  }
-
-  Future<void> _getAddressFromLatLng(LatLng latLng, bool isStartLocation) async {
-    const apiKey = "AIzaSyABT2XqfABLKZHWlxg_IF412hYYOqZWYAk"; // Cambia esto por tu clave
-    final url = Uri.parse(
-      "https://maps.googleapis.com/maps/api/geocode/json?latlng=${latLng.latitude},${latLng.longitude}&key=$apiKey",
-    );
-
-    final response = await http.get(url);
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      if (data['results'].isNotEmpty) {
-        String address = data['results'][0]['formatted_address'];
-        setState(() {
-          if (isStartLocation) {
-            startController.text = address; // Mostrar dirección en el campo de texto de inicio
-          } else {
-            destinationController.text = address; // Mostrar dirección en el campo de texto de destino
-          }
-        });
-      } else {
-        // Si no se encuentra una dirección, muestra las coordenadas
-        setState(() {
-          if (isStartLocation) {
-            startController.text = "${latLng.latitude}, ${latLng.longitude}";
-          } else {
-            destinationController.text = "${latLng.latitude}, ${latLng.longitude}";
-          }
-        });
-      }
-    } else {
-      print("Error al obtener la dirección: ${response.statusCode}");
-      print("Cuerpo de la respuesta: ${response.body}");
     }
   }
 
@@ -191,15 +171,23 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.menu, color: Colors.black),
-          onPressed: () {},
-        ),
-        actions: const [
-          CircleAvatar(
-            backgroundImage: AssetImage('assets/perfilFoto.png'),
+        automaticallyImplyLeading: false,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16.0),
+            child: IconButton(
+              icon: const CircleAvatar(
+                radius: 20,
+                backgroundImage: AssetImage('assets/perfilFoto.png'),
+              ),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ProfileScreen()),
+                );
+              },
+            ),
           ),
-          SizedBox(width: 10),
         ],
       ),
       body: Padding(
@@ -211,76 +199,117 @@ class _HomeScreenState extends State<HomeScreen> {
               controller: startController,
               decoration: InputDecoration(
                 prefixIcon: const Icon(Icons.location_on, color: Colors.red),
-                hintText: 'Seleccione en el mapa su ubicación',
+                hintText: 'Seleccione su ubicación',
                 filled: true,
                 fillColor: Colors.grey[200],
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
                 ),
+                contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 12),
             TextField(
               controller: destinationController,
               decoration: InputDecoration(
                 prefixIcon: const Icon(Icons.search, color: Colors.red),
-                hintText: 'Seleccione en el mapa su destino',
+                hintText: 'Seleccione su destino',
                 filled: true,
                 fillColor: Colors.grey[200],
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
                 ),
+                contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
             Expanded(
-              child: GoogleMap(
-                onMapCreated: _onMapCreated,
-                initialCameraPosition: CameraPosition(
-                  target: _startLatLng ?? const LatLng(16.621537, -93.099800),
-                  zoom: 14.0,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: GoogleMap(
+                  onMapCreated: _onMapCreated,
+                  initialCameraPosition: CameraPosition(
+                    target: _startLatLng ?? const LatLng(16.621537, -93.099800),
+                    zoom: 14.0,
+                  ),
+                  myLocationEnabled: true,
+                  myLocationButtonEnabled: true,
+                  markers: {
+                    if (_startMarker != null) _startMarker!,
+                    if (_destinationMarker != null) _destinationMarker!,
+                  },
+                  polylines: {
+                    if (_routePolyline != null) _routePolyline!,
+                  },
+                  onTap: (LatLng latLng) {
+                    showModalBottomSheet(
+                      context: context,
+                      builder: (context) => Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ListTile(
+                            leading: const Icon(Icons.location_on),
+                            title: const Text('Establecer como ubicación inicial'),
+                            onTap: () {
+                              Navigator.pop(context);
+                              _setMarkerAndAddress(latLng, startController, isStartLocation: true);
+                            },
+                          ),
+                          ListTile(
+                            leading: const Icon(Icons.location_on_outlined),
+                            title: const Text('Establecer como destino'),
+                            onTap: () {
+                              Navigator.pop(context);
+                              _setMarkerAndAddress(latLng, destinationController, isStartLocation: false);
+                            },
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                 ),
-                myLocationEnabled: true,
-                myLocationButtonEnabled: true,
-                markers: {
-                  if (_startMarker != null) _startMarker!,
-                  if (_destinationMarker != null) _destinationMarker!,
-                },
-                polylines: {
-                  if (_routePolyline != null) _routePolyline!,
-                },
-                onTap: (LatLng latLng) {
-                  showModalBottomSheet(
-                    context: context,
-                    builder: (context) => Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        ListTile(
-                          leading: const Icon(Icons.location_on),
-                          title: const Text('Establecer como ubicación inicial'),
-                          onTap: () {
-                            Navigator.pop(context);
-                            _selectLocation(latLng, true);
-                          },
-                        ),
-                        ListTile(
-                          leading: const Icon(Icons.location_on_outlined),
-                          title: const Text('Establecer como destino'),
-                          onTap: () {
-                            Navigator.pop(context);
-                            _selectLocation(latLng, false);
-                          },
-                        ),
-                      ],
-                    ),
-                  );
-                },
               ),
             ),
           ],
         ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: const Color.fromARGB(255, 30, 30, 30),
+        items: <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Image.asset('assets/icons/IcoNavBar1.png'),
+            label: '',
+          ),
+          BottomNavigationBarItem(
+            icon: Image.asset('assets/icons/IcoNavBar2.png'),
+            label: '',
+          ),
+          BottomNavigationBarItem(
+            icon: Image.asset('assets/icons/IcoNavBar3.png'),
+            label: '',
+          ),
+          BottomNavigationBarItem(
+            icon: Image.asset('assets/icons/IcoNavBar4.png'),
+            label: '',
+          ),
+          BottomNavigationBarItem(
+            icon: Image.asset('assets/icons/IcoNavBar5.png'),
+            label: '',
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: Colors.yellow,
+        unselectedItemColor: Colors.grey,
+        onTap: (int index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
+        showSelectedLabels: false,
+        showUnselectedLabels: false,
       ),
     );
   }

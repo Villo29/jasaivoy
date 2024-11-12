@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:jasaivoy/pages/JasaiVoyViajes.dart';
 
+
 class PassengerRegistrationScreen extends StatefulWidget {
   const PassengerRegistrationScreen({super.key});
 
@@ -34,17 +35,22 @@ class _PassengerRegistrationScreenState
     final String contrasena = _passwordController.text;
     final String telefono = _telefonoController.text;
 
-    if (nombre.isNotEmpty && correo.isNotEmpty && contrasena.isNotEmpty && telefono.isNotEmpty) {
+    if (nombre.isNotEmpty &&
+        correo.isNotEmpty &&
+        contrasena.isNotEmpty &&
+        telefono.isNotEmpty) {
       if (contrasena.length < 6) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('La contraseña debe tener al menos 6 caracteres')),
+          const SnackBar(
+              content: Text('La contraseña debe tener al menos 6 caracteres')),
         );
         return;
       }
 
       if (telefono.length < 10) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('El número de teléfono debe tener al menos 10 dígitos')),
+          const SnackBar(
+              content: Text('El número de teléfono debe tener al menos 10 dígitos')),
         );
         return;
       }
@@ -61,17 +67,37 @@ class _PassengerRegistrationScreenState
           }),
         );
 
+        // Imprimir la respuesta para ver el formato
+        print('Response status: ${response.statusCode}');
+        print('Response body: ${response.body}');
+
         if (response.statusCode == 200 || response.statusCode == 201) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Registro exitoso')),
-          );
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const MyApp()),
-          );
+          final data = json.decode(response.body);
+
+          // Verificar si la respuesta contiene los campos esperados
+          if (data != null && data['token'] != null && data['_id'] != null) {
+            // Guardar los datos en el AuthModel usando el provider
+
+            // Mostrar un mensaje de registro exitoso
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Registro exitoso')),
+            );
+
+            // Redirigir a la pantalla de inicio de la aplicación
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const MyApp()),
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Error al procesar la respuesta del servidor')),
+            );
+          }
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error en el registro: ${response.statusCode} - ${response.body}')),
+            SnackBar(
+                content: Text(
+                    'Error en el registro: ${response.statusCode} - ${response.body}')),
           );
         }
       } catch (e) {
@@ -213,7 +239,9 @@ class _PassengerRegistrationScreenState
                 onChanged: (value) {
                   if (value.length > 10) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('El número de teléfono debe tener máximo 10 dígitos')),
+                      const SnackBar(
+                          content: Text(
+                              'El número de teléfono debe tener máximo 10 dígitos')),
                     );
                   }
                 },
@@ -224,7 +252,8 @@ class _PassengerRegistrationScreenState
                   onPressed: _registerUser,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.lightBlueAccent,
-                    padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 50, vertical: 15),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                     ),

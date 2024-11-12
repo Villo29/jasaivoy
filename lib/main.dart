@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jasaivoy/pages/login.dart';
+import 'package:jasaivoy/pages/models/auth_model.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   runApp(const SplashApp());
@@ -10,12 +12,16 @@ class SplashApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Jasai Voy',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+    return ChangeNotifierProvider(
+      create: (_) => AuthModel(),
+      child: MaterialApp(
+        title: 'Jasai Voy',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+        ),
+        home: const SplashScreen(),
+        debugShowCheckedModeBanner: false,
       ),
-      home: const SplashScreen(),
     );
   }
 }

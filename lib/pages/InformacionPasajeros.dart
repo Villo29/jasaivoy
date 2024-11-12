@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:jasaivoy/pages/models/auth_model.dart';
 import 'package:jasaivoy/pages/ViajesRegistradosPasajeros.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -6,13 +8,17 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Obtén la instancia de AuthModel para acceder a los datos del usuario
+    final authModel = Provider.of<AuthModel>(context);
+    final user = authModel.currentUser;
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: const Text(
-          'Hola Carlos 👋',
-          style: TextStyle(
+        title: Text(
+          'Hola ${user?.nombre ?? ''} 👋',
+          style: const TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
             color: Colors.black,
@@ -38,23 +44,24 @@ class ProfileScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            InfoRow(label: 'Nombre', value: 'Carlos'),
-            InfoRow(label: 'Apellido', value: 'Cruz'),
-            InfoRow(label: 'Número de teléfono', value: '968-109-6112'),
+            InfoRow(label: 'Nombre', value: user?.nombre ?? 'N/A'),
+            InfoRow(label: 'Número de teléfono', value: user?.telefono ?? 'N/A'),
             InfoRow(
                 label: 'Correo electrónico',
-                value: 'contacto.carlos.zarmiento@gmail.com'),
+                value: user?.correo ?? 'N/A'),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => ViajesRegistradosScreen()),
+                  MaterialPageRoute(
+                      builder: (context) => const ViajesRegistradosScreen()),
                 );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.lightBlueAccent.withOpacity(0.3),
-                padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
                 ),
@@ -71,7 +78,8 @@ class ProfileScreen extends StatelessWidget {
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.lightBlueAccent.withOpacity(0.3),
-                padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
                 ),
@@ -91,7 +99,6 @@ class ProfileScreen extends StatelessWidget {
 class InfoRow extends StatelessWidget {
   final String label;
   final String value;
-
   const InfoRow({super.key, required this.label, required this.value});
 
   @override
@@ -102,7 +109,6 @@ class InfoRow extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Flexible(
-            // Cambiado a Flexible para que el label ocupe lo necesario
             child: Text(
               label,
               style: const TextStyle(
@@ -111,10 +117,9 @@ class InfoRow extends StatelessWidget {
             ),
           ),
           Flexible(
-            // Cambiado a Flexible para que el value ocupe lo necesario
             child: Text(
               value,
-              overflow: TextOverflow.visible, // Permitir que el texto se ajuste
+              overflow: TextOverflow.visible,
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
               ),
