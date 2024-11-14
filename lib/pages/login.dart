@@ -4,7 +4,7 @@ import 'package:jasaivoy/pages/models/auth_model.dart';
 import 'package:jasaivoy/pages/validar-code.dart';
 import 'package:jasaivoy/pages/pasajero.dart';
 import 'package:jasaivoy/pages/register_driver_screen.dart';
-import 'package:jasaivoy/pages/forgot_password_screen.dart.dart';
+import 'package:jasaivoy/pages/forgot_password_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -57,12 +57,13 @@ class _LoginScreenState extends State<LoginScreen> {
       appBar: AppBar(
         title: const Text('Login'),
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            const SizedBox(height: 60), // Espacio inicial
             const Text(
               'Login',
               style: TextStyle(
@@ -148,7 +149,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(width: 5),
                 TextButton(
                   onPressed: () {
-                    // Redirige a la pantalla de registro de pasajero
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -184,7 +184,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) =>  RegisterDriverScreen(),
+                        builder: (context) => RegisterDriverScreen(),
                       ),
                     );
                   },
