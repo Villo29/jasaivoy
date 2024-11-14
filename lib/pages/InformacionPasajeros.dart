@@ -8,7 +8,6 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Obtén la instancia de AuthModel para acceder a los datos del usuario
     final authModel = Provider.of<AuthModel>(context);
     final user = authModel.currentUser;
 
