@@ -17,7 +17,9 @@ class RegisteredTripsScreen extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
             child: CircleAvatar(
-              backgroundImage: AssetImage('assets/profile_pic.png'), // Imagen de perfil
+              backgroundImage: AssetImage(
+                'assets/perfilFoto.png', // Cambia la imagen según sea necesario
+              ), // Imagen de perfil
             ),
           ),
         ],

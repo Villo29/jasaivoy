@@ -1,7 +1,49 @@
 import 'package:flutter/material.dart';
+import 'package:jasaivoy/pages/RegistroDeUnidad.dart';
+import 'package:jasaivoy/pages/Viajesregistradosconductor.dart';
 
-class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key});
+class ProfileScreenDriver extends StatefulWidget {
+  const ProfileScreenDriver({super.key});
+
+  @override
+  _ProfileScreenDriverState createState() => _ProfileScreenDriverState();
+}
+
+class _ProfileScreenDriverState extends State<ProfileScreenDriver> {
+  int _selectedIndex = 0;
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+    // Navegación según el índice (ajusta según tus páginas)
+    switch (index) {
+      case 0:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => ProfileScreenDriver()),
+        );
+        break;
+      case 1:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => RegisteredTripsScreen()),
+        );
+        break;
+      case 2:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => RegistroUnidadPage()),
+        );
+        break;
+      case 3:
+        // Navegar a la página de perfil o ajustes
+        break;
+      case 4:
+        // Navegar a la página de configuración
+        break;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -12,8 +54,9 @@ class ProfileScreen extends StatelessWidget {
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
-            child: CircleAvatar(
-              backgroundImage: AssetImage('assets/profile_pic.png'), // Imagen de perfil
+            child: const CircleAvatar(
+              radius: 50,
+              backgroundImage: AssetImage('assets/perfilFoto.png'),
             ),
           ),
         ],
@@ -48,7 +91,10 @@ class ProfileScreen extends StatelessWidget {
             const SizedBox(height: 30),
             ElevatedButton(
               onPressed: () {
-                // Lógica para "Viajes realizados"
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => RegisteredTripsScreen()),
+                );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color.fromARGB(255, 197, 251, 246),
@@ -62,7 +108,10 @@ class ProfileScreen extends StatelessWidget {
             const SizedBox(height: 10),
             ElevatedButton(
               onPressed: () {
-                // Lógica para "Registro de unidad"
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => RegistroUnidadPage()),
+                );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color.fromARGB(255, 197, 251, 246),
@@ -91,28 +140,36 @@ class ProfileScreen extends StatelessWidget {
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
-        items: const [
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: const Color.fromARGB(255, 30, 30, 30),
+        items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(Icons.home, color: Colors.black),
+            icon: Image.asset('assets/icons/IcoNavBar1.png', height: 30),
             label: '',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.search, color: Colors.black),
+            icon: Image.asset('assets/icons/IcoNavBar2.png', height: 30),
             label: '',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.home_repair_service, color: Colors.black),
+            icon: Image.asset('assets/icons/IcoNavBar3.png', height: 30),
             label: '',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person, color: Colors.black),
+            icon: Image.asset('assets/icons/IcoNavBar4.png', height: 30),
             label: '',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.settings, color: Colors.black),
+            icon: Image.asset('assets/icons/IcoNavBar5.png', height: 30),
             label: '',
           ),
         ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: Colors.yellow,
+        unselectedItemColor: Colors.grey,
+        onTap: _onItemTapped,
+        showSelectedLabels: false,
+        showUnselectedLabels: false,
       ),
     );
   }

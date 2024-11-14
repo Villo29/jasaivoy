@@ -3,8 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:jasaivoy/pages/models/auth_model.dart';
 import 'package:jasaivoy/pages/validar-code.dart';
 import 'package:jasaivoy/pages/pasajero.dart';
-import 'package:jasaivoy/pages/register_driver_screen.dart';
 import 'package:jasaivoy/pages/forgot_password_screen.dart';
+import 'package:jasaivoy/pages/RegistroConductor.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -152,7 +152,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const PassengerRegistrationScreen(),
+                        builder: (context) =>
+                            const PassengerRegistrationScreen(),
                       ),
                     );
                   },
