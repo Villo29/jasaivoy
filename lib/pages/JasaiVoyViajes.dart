@@ -6,6 +6,9 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/services.dart';
 import 'package:jasaivoy/pages/InformacionPasajeros.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:jasaivoy/pages/models/user_model.dart';
+import 'package:jasaivoy/pages/models/auth_model.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   runApp(const MyApp());
@@ -16,9 +19,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: HomeScreen(token: ''), // Pasa un token aquí para pruebas
+    return ChangeNotifierProvider(
+      create: (context) => AuthModel(),
+      child: const MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: HomeScreen(token: ''), // Pasa un token aquí para pruebas
+      ),
     );
   }
 }
@@ -43,20 +49,20 @@ class _HomeScreenState extends State<HomeScreen> {
 
   TextEditingController startController = TextEditingController();
   TextEditingController destinationController = TextEditingController();
-  TextEditingController nameController = TextEditingController();
-  TextEditingController phoneController = TextEditingController();
 
   int _selectedIndex = 0;
   bool _isRequestingRide = false;
   late IO.Socket socket;
+  UserModel? user;
 
-  final String apiKey = "YOUR_GOOGLE_API_KEY";
+  final String apiKey = "AIzaSyABT2XqfABLKZHWlxg_IF412hYYOqZWYAk";
 
   @override
   void initState() {
     super.initState();
     _getCurrentLocation();
     _initializeSocket();
+    _loadUserData();
   }
 
   void _getCurrentLocation() async {
@@ -66,6 +72,10 @@ class _HomeScreenState extends State<HomeScreen> {
     _setMarkerAndAddress(_startLatLng!, startController, isStartLocation: true);
   }
 
+  void _loadUserData() {
+    // Obtener la información del usuario desde AuthModel
+    user = Provider.of<AuthModel>(context, listen: false).currentUser;
+  }
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
   }
@@ -147,7 +157,6 @@ class _HomeScreenState extends State<HomeScreen> {
       return "Error al obtener dirección";
     }
   }
-
   Future<void> _getRoutePolyline() async {
     if (_startLatLng == null || _destinationLatLng == null) return;
 
@@ -159,15 +168,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      print(
-          "Response from Directions API: ${data}"); // Depuración: Datos de la API
-
       if (data['routes'].isNotEmpty) {
         final polylinePoints = data['routes'][0]['overview_polyline']['points'];
         final polylineCoordinates = _decodePolyline(polylinePoints);
-
-        print(
-            "Polyline points: ${polylineCoordinates.length} points"); // Depuración: Número de puntos
 
         setState(() {
           _routePolyline = Polyline(
@@ -177,12 +180,7 @@ class _HomeScreenState extends State<HomeScreen> {
             width: 5,
           );
         });
-      } else {
-        print("No routes found in API response."); // Depuración: Sin rutas
       }
-    } else {
-      print(
-          "Failed to fetch route. Status code: ${response.statusCode}"); // Depuración: Error en la API
     }
   }
 
@@ -214,13 +212,11 @@ class _HomeScreenState extends State<HomeScreen> {
       points.add(LatLng(lat / 1E5, lng / 1E5));
     }
 
-    print(
-        "Decoded polyline points: $points"); // Depuración: puntos decodificados
     return points;
   }
 
   Future<void> _requestRide() async {
-    if (_startLatLng == null || _destinationLatLng == null) return;
+    if (_startLatLng == null || _destinationLatLng == null || user == null) return;
 
     setState(() {
       _isRequestingRide = true;
@@ -237,10 +233,13 @@ class _HomeScreenState extends State<HomeScreen> {
           'latitude': _destinationLatLng!.latitude,
           'longitude': _destinationLatLng!.longitude,
         },
-        'passengerName': nameController.text,
-        'phoneNumber': phoneController.text,
+        'passengerName': user!.nombre,
+        'phoneNumber': user!.telefono,
         'passengerId': socket.id,
       });
+
+      // Enviar datos del viaje al webhook
+      await _sendDataToWebhook();
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Solicitud de viaje enviada. Esperando conductor...')),
@@ -253,6 +252,32 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() {
         _isRequestingRide = false;
       });
+    }
+  }
+
+  Future<void> _sendDataToWebhook() async {
+    final url = Uri.parse('https://example.com/webhook'); // Cambia la URL por la de tu webhook
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({
+        'start': {
+          'latitude': _startLatLng!.latitude,
+          'longitude': _startLatLng!.longitude,
+        },
+        'destination': {
+          'latitude': _destinationLatLng!.latitude,
+          'longitude': _destinationLatLng!.longitude,
+        },
+        'passengerName': user!.nombre,
+        'phoneNumber': user!.telefono,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      print('Datos enviados al webhook correctamente');
+    } else {
+      print('Error al enviar datos al webhook: ${response.statusCode}');
     }
   }
 
@@ -287,38 +312,6 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            TextField(
-              controller: nameController,
-              decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.person, color: Colors.red),
-                hintText: 'Ingrese su nombre',
-                filled: true,
-                fillColor: Colors.grey[200],
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-                contentPadding:
-                    const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: phoneController,
-              decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.phone, color: Colors.red),
-                hintText: 'Ingrese su teléfono',
-                filled: true,
-                fillColor: Colors.grey[200],
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-                contentPadding:
-                    const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-              ),
-            ),
-            const SizedBox(height: 12),
             TextField(
               controller: startController,
               decoration: InputDecoration(
