@@ -81,7 +81,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _initializeSocket() {
-    socket = IO.io('http://localhost:4000', <String, dynamic>{
+    socket = IO.io('http://52.205.241.234:4000', <String, dynamic>{
       'transports': ['websocket'],
       'autoConnect': false,
     });
@@ -256,7 +256,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _sendDataToWebhook() async {
-    final url = Uri.parse('https://example.com/webhook'); // Cambia la URL por la de tu webhook
+    final url = Uri.parse('http://52.205.241.234:4000/webhook'); // Cambia la URL por la de tu webhook
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
