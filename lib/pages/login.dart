@@ -4,7 +4,6 @@ import 'package:jasaivoy/pages/models/auth_model.dart';
 import 'package:jasaivoy/pages/validar-code.dart';
 import 'package:jasaivoy/pages/pasajero.dart';
 import 'package:jasaivoy/pages/forgot_password_screen.dart';
-import 'package:jasaivoy/pages/RegistroConductor.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -172,28 +171,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: Text('O'),
                 ),
                 Expanded(child: Divider()),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text('¿Conductor?'),
-                const SizedBox(width: 5),
-                TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => RegisterDriverScreen(),
-                      ),
-                    );
-                  },
-                  child: const Text(
-                    'Regístrate',
-                    style: TextStyle(color: Colors.red),
-                  ),
-                ),
               ],
             ),
           ],

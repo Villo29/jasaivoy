@@ -8,8 +8,8 @@ class VerificationScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TextEditingController _emailController = TextEditingController();
-    final TextEditingController _codeController = TextEditingController();
+    final TextEditingController emailController = TextEditingController();
+    final TextEditingController codeController = TextEditingController();
     final authModel = Provider.of<AuthModel>(context, listen: false);
 
     return Scaffold(
@@ -26,7 +26,7 @@ class VerificationScreen extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             TextField(
-              controller: _emailController,
+              controller: emailController,
               decoration: const InputDecoration(
                 labelText: 'Correo',
                 border: OutlineInputBorder(),
@@ -34,7 +34,7 @@ class VerificationScreen extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             TextField(
-              controller: _codeController,
+              controller: codeController,
               decoration: const InputDecoration(
                 labelText: 'Código de verificación',
                 border: OutlineInputBorder(),
@@ -44,8 +44,8 @@ class VerificationScreen extends StatelessWidget {
             ElevatedButton(
               onPressed: () async {
                 try {
-                  final email = _emailController.text;
-                  final codigoVerificacion = _codeController.text;
+                  final email = emailController.text;
+                  final codigoVerificacion = codeController.text;
 
                   // Llama a verifyCode con el correo y el código
                   await authModel.verifyCode(codigoVerificacion, email);

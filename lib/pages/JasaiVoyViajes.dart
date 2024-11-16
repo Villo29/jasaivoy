@@ -3,10 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter/services.dart';
 import 'package:jasaivoy/pages/InformacionPasajeros.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
-import 'package:jasaivoy/pages/models/user_model.dart';
+import 'package:jasaivoy/pages/models/user_model.dart' as userModel; // Prefijo para UserModel del usuario
 import 'package:jasaivoy/pages/models/auth_model.dart';
 import 'package:provider/provider.dart';
 
@@ -53,9 +52,9 @@ class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   bool _isRequestingRide = false;
   late IO.Socket socket;
-  UserModel? user;
+  userModel.UserModel? user; // Usando el prefijo para evitar la ambigüedad
 
-  final String apiKey = "AIzaSyABT2XqfABLKZHWlxg_IF412hYYOqZWYAk";
+  final String apiKey = "";
 
   @override
   void initState() {
@@ -72,10 +71,19 @@ class _HomeScreenState extends State<HomeScreen> {
     _setMarkerAndAddress(_startLatLng!, startController, isStartLocation: true);
   }
 
-  void _loadUserData() {
-    // Obtener la información del usuario desde AuthModel
-    user = Provider.of<AuthModel>(context, listen: false).currentUser;
+ void _loadUserData() {
+  // Obtener la información del usuario desde AuthModel y castear al modelo necesario
+  final authUser = Provider.of<AuthModel>(context, listen: false).currentUser;
+  if (authUser != null) {
+    user = userModel.UserModel(
+      id: authUser.id,
+      nombre: authUser.nombre,
+      correo: authUser.correo,
+      telefono: authUser.telefono,
+    );
   }
+}
+
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
   }
@@ -157,6 +165,7 @@ class _HomeScreenState extends State<HomeScreen> {
       return "Error al obtener dirección";
     }
   }
+
   Future<void> _getRoutePolyline() async {
     if (_startLatLng == null || _destinationLatLng == null) return;
 
