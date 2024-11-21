@@ -5,7 +5,7 @@ import 'package:location/location.dart';
 import 'package:http/http.dart' as http;
 import 'package:jasaivoy/pages/InformacionPasajeros.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
-import 'package:jasaivoy/pages/models/user_model.dart' as userModel; // Prefijo para UserModel del usuario
+import 'package:jasaivoy/pages/models/user_model.dart' as userModel;
 import 'package:jasaivoy/pages/models/auth_model.dart';
 import 'package:provider/provider.dart';
 
@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
       create: (context) => AuthModel(),
       child: const MaterialApp(
         debugShowCheckedModeBanner: false,
-        home: HomeScreen(token: ''), // Pasa un token aquí para pruebas
+        home: HomeScreen(token: ''),
       ),
     );
   }
@@ -52,9 +52,9 @@ class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   bool _isRequestingRide = false;
   late IO.Socket socket;
-  userModel.UserModel? user; // Usando el prefijo para evitar la ambigüedad
+  userModel.UserModel? user;
 
-  final String apiKey = "";
+  final String apiKey = "AIzaSyABT2XqfABLKZHWlxg_IF412hYYOqZWYAk";
 
   @override
   void initState() {
@@ -89,7 +89,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _initializeSocket() {
-    socket = IO.io('http://52.205.241.234:4000', <String, dynamic>{
+    socket = IO.io('http://35.175.159.211:4000', <String, dynamic>{
       'transports': ['websocket'],
       'autoConnect': false,
     });
@@ -114,6 +114,8 @@ class _HomeScreenState extends State<HomeScreen> {
       print('Disconnected from WebSocket server');
     });
   }
+
+
 
   Future<void> _setMarkerAndAddress(
       LatLng position, TextEditingController controller,
@@ -265,7 +267,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _sendDataToWebhook() async {
-    final url = Uri.parse('http://52.205.241.234:4000/webhook'); // Cambia la URL por la de tu webhook
+    final url = Uri.parse('http://35.175.159.211:4000/webhook'); // Cambia la URL por la de tu webhook
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},

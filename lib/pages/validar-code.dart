@@ -46,8 +46,6 @@ class VerificationScreen extends StatelessWidget {
                 try {
                   final email = emailController.text;
                   final codigoVerificacion = codeController.text;
-
-                  // Llama a verifyCode con el correo y el código
                   await authModel.verifyCode(codigoVerificacion, email);
                   if (authModel.isVerified) {
                     // Navegar a la pantalla principal después de la verificación

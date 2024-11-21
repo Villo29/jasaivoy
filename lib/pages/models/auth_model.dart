@@ -18,7 +18,7 @@ class AuthModel extends ChangeNotifier {
 
   // Método de login solo para verificar credenciales
   Future<void> login(String correo, String contrasena) async {
-    var url = Uri.parse('http://34.231.108.121:3028/api/v1/users/login');
+    var url = Uri.parse('http://35.175.159.211:3028/api/v1/users/login');
     var response = await http.post(
       url,
       headers: {
@@ -40,7 +40,7 @@ class AuthModel extends ChangeNotifier {
 
   // Método para verificar el código y obtener los datos completos del usuario
   Future<void> verifyCode(String codigo, String correo) async {
-    var url = Uri.parse('http://34.231.108.121:3028/api/v1/users/validar-usuario');
+    var url = Uri.parse('http://35.175.159.211:3028/api/v1/users/validar-usuario');
     var response = await http.post(
       url,
       headers: {
