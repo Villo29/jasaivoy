@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:jasaivoy/pages/models/auth_model.dart';
 import 'package:jasaivoy/pages/ViajesRegistradosPasajeros.dart';
+import 'package:jasaivoy/pages/EditProfileScreen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -29,11 +30,11 @@ class ProfileScreen extends StatelessWidget {
         padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
-            const CircleAvatar(
-              radius: 50,
-              backgroundImage: AssetImage(
-                  'assets/perfilFoto.png'), // Cambia la imagen según sea necesario
-            ),
+            if (user?.foto != null)
+              CircleAvatar(
+                radius: 50,
+                backgroundImage: NetworkImage(user!.foto!),
+              ),
             const SizedBox(height: 20),
             const Text(
               'Bienvenido a Jasai',
@@ -44,10 +45,9 @@ class ProfileScreen extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             InfoRow(label: 'Nombre', value: user?.nombre ?? 'N/A'),
-            InfoRow(label: 'Número de teléfono', value: user?.telefono ?? 'N/A'),
             InfoRow(
-                label: 'Correo electrónico',
-                value: user?.correo ?? 'N/A'),
+                label: 'Número de teléfono', value: user?.telefono ?? 'N/A'),
+            InfoRow(label: 'Correo electrónico', value: user?.correo ?? 'N/A'),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
@@ -72,8 +72,16 @@ class ProfileScreen extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             ElevatedButton(
-              onPressed: () {
-                // Acción para "Editar perfil"
+              onPressed: () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const EditProfileScreen()),
+                );
+
+                // Recargar los datos después de regresar de la edición
+                Provider.of<AuthModel>(context, listen: false)
+                    .fetchUserDetails();
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.lightBlueAccent.withOpacity(0.3),

@@ -1,7 +1,10 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'dart:convert';
-import 'package:jasaivoy/pages/JasaiVoyViajes.dart';
+import 'JasaiVoyViajes.dart';
 
 
 class PassengerRegistrationScreen extends StatefulWidget {
@@ -19,6 +22,7 @@ class _PassengerRegistrationScreenState
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _telefonoController = TextEditingController();
   bool _isPasswordVisible = false;
+  File? _selectedImage;
 
   @override
   void dispose() {
@@ -27,6 +31,31 @@ class _PassengerRegistrationScreenState
     _passwordController.dispose();
     _telefonoController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickImage() async {
+    await _requestStoragePermission();
+    if (await Permission.storage.isGranted) {
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+      if (pickedFile != null) {
+        setState(() {
+          _selectedImage = File(pickedFile.path);
+        });
+      }
+    }
+  }
+
+  Future<void> _requestStoragePermission() async {
+    final status = await Permission.storage.request();
+    if (status.isDenied) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Por favor, otorga permisos de almacenamiento')),
+      );
+    } else if (status.isPermanentlyDenied) {
+      openAppSettings();
+    }
   }
 
   Future<void> _registerUser() async {
@@ -38,66 +67,39 @@ class _PassengerRegistrationScreenState
     if (nombre.isNotEmpty &&
         correo.isNotEmpty &&
         contrasena.isNotEmpty &&
-        telefono.isNotEmpty) {
-      if (contrasena.length < 6) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('La contraseña debe tener al menos 6 caracteres')),
-        );
-        return;
-      }
-
-      if (telefono.length < 10) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('El número de teléfono debe tener al menos 10 dígitos')),
-        );
-        return;
-      }
-
+        telefono.isNotEmpty &&
+        _selectedImage != null) {
       try {
-        final response = await http.post(
-          Uri.parse('http://34.231.108.121:3029/api/v1/users'),
-          headers: {'Content-Type': 'application/json'},
-          body: json.encode({
-            'nombre': nombre,
-            'correo': correo,
-            'contrasena': contrasena,
-            'telefono': telefono,
-          }),
+        final uri = Uri.parse('http://35.175.159.211:3028/api/v1/users');
+        final request = http.MultipartRequest('POST', uri);
+
+        // Campos de texto
+        request.fields['nombre'] = nombre;
+        request.fields['correo'] = correo;
+        request.fields['contrasena'] = contrasena;
+        request.fields['telefono'] = telefono;
+
+        // Archivo
+        request.files.add(
+          await http.MultipartFile.fromPath('imagenPath', _selectedImage!.path),
         );
 
-        // Imprimir la respuesta para ver el formato
-        print('Response status: ${response.statusCode}');
-        print('Response body: ${response.body}');
+        // Enviar solicitud
+        final response = await request.send();
 
         if (response.statusCode == 200 || response.statusCode == 201) {
-          final data = json.decode(response.body);
-
-          // Verificar si la respuesta contiene los campos esperados
-          if (data != null && data['token'] != null && data['_id'] != null) {
-            // Guardar los datos en el AuthModel usando el provider
-
-            // Mostrar un mensaje de registro exitoso
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Registro exitoso')),
-            );
-
-            // Redirigir a la pantalla de inicio de la aplicación
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const MyApp()),
-            );
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Error al procesar la respuesta del servidor')),
-            );
-          }
-        } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content: Text(
-                    'Error en el registro: ${response.statusCode} - ${response.body}')),
+            const SnackBar(content: Text('Registro exitoso')),
+          );
+
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const MyApp()),
+          );
+        } else {
+          final responseBody = await response.stream.bytesToString();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error en el registro: $responseBody')),
           );
         }
       } catch (e) {
@@ -154,6 +156,23 @@ class _PassengerRegistrationScreenState
                 ),
               ),
               const SizedBox(height: 40),
+              GestureDetector(
+                onTap: _pickImage,
+                child: Center(
+                  child: _selectedImage == null
+                      ? Column(
+                          children: [
+                            Icon(Icons.image, size: 100, color: Colors.grey),
+                            const Text('Seleccionar Imagen'),
+                          ],
+                        )
+                      : Image.file(
+                          _selectedImage!,
+                          height: 120,
+                        ),
+                ),
+              ),
+              const SizedBox(height: 20),
               TextField(
                 controller: _nombreController,
                 decoration: InputDecoration(
@@ -207,12 +226,8 @@ class _PassengerRegistrationScreenState
                     borderRadius: BorderRadius.circular(10),
                   ),
                   suffixIcon: IconButton(
-                    icon: Image.asset(
-                      _isPasswordVisible
-                          ? 'assets/icons/IcoOcultarContraseña.png'
-                          : 'assets/icons/IcoOcultarContraseña.png',
-                      width: 20,
-                      height: 20,
+                    icon: Icon(
+                      _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
                     ),
                     onPressed: () {
                       setState(() {
@@ -236,15 +251,6 @@ class _PassengerRegistrationScreenState
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                onChanged: (value) {
-                  if (value.length > 10) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text(
-                              'El número de teléfono debe tener máximo 10 dígitos')),
-                    );
-                  }
-                },
               ),
               const SizedBox(height: 20),
               Center(
