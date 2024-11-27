@@ -4,6 +4,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:http/http.dart' as http;
 import 'package:jasaivoy/pages/InformacionPasajeros.dart';
+import 'package:jasaivoy/pages/ViajesRegistradosPasajeros.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:jasaivoy/pages/models/user_model.dart' as userModel;
 import 'package:jasaivoy/pages/models/auth_model.dart';
@@ -201,7 +202,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 'Teléfono: ${_driverInfo?['phone']}',
                 style: const TextStyle(fontSize: 16),
               ),
-              Text (
+              Text(
                 'Matricula: ${_driverInfo?['matricula']}',
                 style: const TextStyle(fontSize: 16),
               ),
@@ -668,10 +669,6 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: const Color.fromARGB(255, 30, 30, 30),
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Image.asset('assets/icons/IcoNavBar1.png'),
-            label: '',
-          ),
-          BottomNavigationBarItem(
             icon: Image.asset('assets/icons/IcoNavBar2.png'),
             label: '',
           ),
@@ -694,16 +691,51 @@ class _HomeScreenState extends State<HomeScreen> {
         onTap: (int index) {
           setState(() {
             _selectedIndex = index;
-            if (index == 4) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const ProfileScreen()),
-              );
-            }
           });
+
+          // Maneja la redirección con if
+          if (index == 0) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const GraphScreen()),
+            );
+          } else if (index == 1) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const MyApp()),
+            );
+          } else if (index == 2) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const ViajesRegistradosScreen()),
+            );
+          } else if (index == 3) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const ProfileScreen()),
+            );
+          }
         },
         showSelectedLabels: false,
         showUnselectedLabels: false,
+      ),
+    );
+  }
+}
+
+class GraphScreen extends StatelessWidget {
+  const GraphScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Graficas'),
+        backgroundColor: Colors.green,
+      ),
+      body: const Center(
+        child: Text('Pantalla de Graficas'),
       ),
     );
   }

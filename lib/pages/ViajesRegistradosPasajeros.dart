@@ -93,44 +93,59 @@ class _ViajesRegistradosScreenState extends State<ViajesRegistradosScreen> {
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
+        
         type: BottomNavigationBarType.fixed,
         backgroundColor: const Color.fromARGB(255, 30, 30, 30),
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Image.asset(
-              'assets/icons/IcoNavBar1.png',
-            ),
+            icon: Image.asset('assets/icons/IcoNavBar2.png'),
             label: '',
           ),
           BottomNavigationBarItem(
-            icon: Image.asset(
-              'assets/icons/IcoNavBar2.png',
-            ),
+            icon: Image.asset('assets/icons/IcoNavBar3.png'),
             label: '',
           ),
           BottomNavigationBarItem(
-            icon: Image.asset(
-              'assets/icons/IcoNavBar3.png',
-            ),
+            icon: Image.asset('assets/icons/IcoNavBar4.png'),
             label: '',
           ),
           BottomNavigationBarItem(
-            icon: Image.asset(
-              'assets/icons/IcoNavBar4.png',
-            ),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Image.asset(
-              'assets/icons/IcoNavBar5.png',
-            ),
+            icon: Image.asset('assets/icons/IcoNavBar5.png'),
             label: '',
           ),
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.yellow,
         unselectedItemColor: Colors.grey,
-        onTap: _onItemTapped, // Llama a la función _onItemTapped al seleccionar un ítem
+        onTap: (int index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+
+          // Maneja la redirección con if
+          if (index == 0) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const GraphScreen()),
+            );
+          } else if (index == 1) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const MyApp()),
+            );
+          } else if (index == 2) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const ViajesRegistradosScreen()),
+            );
+          } else if (index == 3) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const ProfileScreen()),
+            );
+          }
+        },
         showSelectedLabels: false,
         showUnselectedLabels: false,
       ),
