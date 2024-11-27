@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:jasaivoy/pages/models/user_model.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthModel extends ChangeNotifier {
   bool _isLoggedIn = false;
@@ -15,6 +16,38 @@ class AuthModel extends ChangeNotifier {
   String get userId => _userId;
   bool get isLoggedIn => _isLoggedIn;
   bool get isVerified => _isVerified;
+
+  Future<void> saveSession() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setString('token', _token);
+    prefs.setString('userId', _userId);
+    if (_currentUser != null) {
+      prefs.setString('currentUser', jsonEncode(_currentUser!.toJson()));
+    }
+    prefs.setBool('isLoggedIn', _isLoggedIn);
+  }
+
+  Future<void> loadSession() async {
+    final prefs = await SharedPreferences.getInstance();
+    _token = prefs.getString('token') ?? '';
+    _userId = prefs.getString('userId') ?? '';
+    _isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+    final currentUserData = prefs.getString('currentUser');
+    if (currentUserData != null) {
+      _currentUser = UserModel.fromJson(jsonDecode(currentUserData));
+    }
+    notifyListeners();
+  }
+
+  Future<void> logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear(); // Limpiar la sesión al cerrar
+    _isLoggedIn = false;
+    _token = '';
+    _userId = '';
+    _currentUser = null;
+    notifyListeners();
+  }
 
   // Método de login solo para verificar credenciales
   Future<void> login(String correo, String contrasena) async {

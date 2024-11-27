@@ -3,9 +3,46 @@ import 'package:provider/provider.dart';
 import 'package:jasaivoy/pages/models/auth_model.dart';
 import 'package:jasaivoy/pages/ViajesRegistradosPasajeros.dart';
 import 'package:jasaivoy/pages/EditProfileScreen.dart';
+import 'package:local_auth/local_auth.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
+
+  Future<void> _authenticate(BuildContext context) async {
+    final LocalAuthentication auth = LocalAuthentication();
+    bool isAuthenticated = false;
+
+    try {
+      isAuthenticated = await auth.authenticate(
+        localizedReason: 'Por favor autentícate para editar tu perfil',
+        options: const AuthenticationOptions(
+          biometricOnly: true, // Solo huella o FaceID
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error en la autenticación: $e')),
+      );
+      return;
+    }
+
+    if (isAuthenticated) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Autenticación exitosa')),
+      );
+      // Ejecutar la acción que ya tienes en tu código original
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const EditProfileScreen(),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Autenticación fallida')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

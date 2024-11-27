@@ -22,4 +22,14 @@ class UserModel {
       foto: json['foto'],
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'nombre': nombre,
+      'correo': correo,
+      'telefono': telefono,
+      'foto': foto,
+    };
+  }
 }

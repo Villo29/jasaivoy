@@ -22,7 +22,7 @@ android {
 
     defaultConfig {
         applicationId "com.jasai.jasaivoy.jasaivoy"
-        minSdkVersion 21 // Define explícitamente tu minSdkVersion
+        minSdkVersion 23 // Define explícitamente tu minSdkVersion
         targetSdkVersion 33 // Especifica explícitamente la versión del SDK objetivo
         versionCode flutter.versionCode
         versionName flutter.versionName

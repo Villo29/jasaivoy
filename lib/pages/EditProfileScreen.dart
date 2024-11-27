@@ -16,6 +16,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   late TextEditingController _emailController;
   late TextEditingController _phoneController;
   bool _isLoading = false;
+  int _selectedIndex = 0;
 
   @override
   void initState() {
