@@ -1,166 +1,92 @@
 import 'package:flutter/material.dart';
-import 'package:jasaivoy/pages/JasaiVoyViajes.dart';
-import 'package:jasaivoy/pages/InformacionPasajeros.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:provider/provider.dart';
+import 'package:jasaivoy/pages/models/auth_model.dart';
 
 class ViajesRegistradosScreen extends StatefulWidget {
   const ViajesRegistradosScreen({super.key});
 
   @override
-  _ViajesRegistradosScreenState createState() => _ViajesRegistradosScreenState();
+  _ViajesRegistradosScreenState createState() =>
+      _ViajesRegistradosScreenState();
 }
 
 class _ViajesRegistradosScreenState extends State<ViajesRegistradosScreen> {
-  int _selectedIndex = 0; // Para mantener el índice seleccionado
+  List<dynamic> viajes = [];
+  bool isLoading = true;
 
-  void _onItemTapped(int index) {
-    if (index == 4) {
-      // Si el índice es 4, navega a la pantalla de perfil
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const ProfileScreen()),
-      );
-    } else {
+  @override
+  void initState() {
+    super.initState();
+    fetchViajes();
+  }
+
+  Future<void> fetchViajes() async {
+    try {
+      final authModel = Provider.of<AuthModel>(context, listen: false);
+      final fetchedViajes = await authModel.fetchViajes();
       setState(() {
-        _selectedIndex = index;
+        viajes = fetchedViajes;
+        isLoading = false;
+      });
+    } catch (e) {
+      print('Error al cargar los viajes: $e');
+      setState(() {
+        isLoading = false;
       });
     }
   }
+
+  final Map<String, Widget Function(BuildContext, dynamic)> views = {
+    "mapView": (context, viaje) => _buildTravelCard(
+          context,
+          passengerName: viaje['passenger_name'],
+          startCoordinates: LatLng(
+            double.parse(viaje['start_latitude']),
+            double.parse(viaje['start_longitude']),
+          ),
+          destinationCoordinates: LatLng(
+            double.parse(viaje['destination_latitude']),
+            double.parse(viaje['destination_longitude']),
+          ),
+        ),
+    "listView": (context, viaje) => ListTile(
+          title: Text("Pasajero: ${viaje['passenger_name']}"),
+          subtitle: Text(
+              "Inicio: ${viaje['start_latitude']}, ${viaje['start_longitude']}\nDestino: ${viaje['destination_latitude']}, ${viaje['destination_longitude']}"),
+        ),
+  };
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: const Text(
-          'Viajes registrados',
-          style: TextStyle(color: Colors.black),
-        ),
-        centerTitle: true,
-        actions: const [
-          CircleAvatar(
-            backgroundImage: AssetImage('assets/ImagenPasajero.png'),
-            radius: 20,
-          ),
-        ],
+        title: const Text('Viajes registrados'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildTravelCard(
-              context,
-              title: 'UPCH-Dpto. Monacos',
-              origen: 'UPCH.',
-              destino: 'Dpto.Monaco',
-              fecha: '22/10/2024',
-              hora: '14:00',
-              precio: 10.00,
-            ),
-            const SizedBox(height: 10),
-            _buildTravelCard(
-              context,
-              title: 'Parque Sta Anita-Mercado',
-              origen: 'Parque Sta.Anita',
-              destino: 'Mercado',
-              fecha: '22/10/2024',
-              hora: '14:00',
-              precio: 20.00,
-            ),
-            const Spacer(),
-            Center(
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const MyApp()),
-                  );
-                },
-                icon: const Icon(Icons.add, color: Colors.black),
-                label:
-                    const Text('Nuevo viaje', style: TextStyle(color: Colors.black)),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.lightBlueAccent.withOpacity(0.3),
-                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: const Color.fromARGB(255, 30, 30, 30),
-        items: <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Image.asset('assets/icons/IcoNavBar2.png'),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Image.asset('assets/icons/IcoNavBar3.png'),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Image.asset('assets/icons/IcoNavBar4.png'),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Image.asset('assets/icons/IcoNavBar5.png'),
-            label: '',
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: Colors.yellow,
-        unselectedItemColor: Colors.grey,
-        onTap: (int index) {
-          setState(() {
-            _selectedIndex = index;
-          });
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : viajes.isEmpty
+              ? const Center(
+                  child: Text('No hay viajes registrados.'),
+                )
+              : ListView.builder(
+                  itemCount: viajes.length,
+                  itemBuilder: (context, index) {
+                    final viaje = viajes[index];
 
-          // Maneja la redirección con if
-          if (index == 0) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const GraphScreen()),
-            );
-          } else if (index == 1) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const MyApp()),
-            );
-          } else if (index == 2) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => const ViajesRegistradosScreen()),
-            );
-          } else if (index == 3) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const ProfileScreen()),
-            );
-          }
-        },
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
-      ),
+                    // Puedes cambiar "mapView" a "listView" para renderizar otra vista.
+                    return views["mapView"]!(context, viaje);
+                  },
+                ),
     );
   }
 
-  Widget _buildTravelCard(BuildContext context,
-      {required String title,
-      required String origen,
-      required String destino,
-      required String fecha,
-      required String hora,
-      required double precio}) {
+  static Widget _buildTravelCard(BuildContext context,
+      {required String passengerName,
+      required LatLng startCoordinates,
+      required LatLng destinationCoordinates}) {
     return Card(
-      elevation: 5,
+      margin: const EdgeInsets.all(8.0),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: Padding(
         padding: const EdgeInsets.all(12.0),
@@ -168,56 +94,30 @@ class _ViajesRegistradosScreenState extends State<ViajesRegistradosScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              title,
+              'Pasajero: $passengerName',
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
-            const SizedBox(height: 5),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('Origen', style: TextStyle(color: Colors.grey)),
-                    Text(origen, style: const TextStyle(color: Colors.red)),
-                  ],
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    const Text('Destino', style: TextStyle(color: Colors.grey)),
-                    Text(destino, style: const TextStyle(color: Colors.red)),
-                  ],
-                ),
-              ],
-            ),
             const SizedBox(height: 10),
-            const Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('Fecha', style: TextStyle(color: Colors.grey)),
-                Text('Hora', style: TextStyle(color: Colors.grey)),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(fecha, style: const TextStyle(color: Colors.red)),
-                Text(hora, style: const TextStyle(color: Colors.red)),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Text(
-                  '\$ ${precio.toStringAsFixed(2)}',
-                  style: const TextStyle(
-                      color: Colors.red,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18),
+            SizedBox(
+              height: 200,
+              child: GoogleMap(
+                initialCameraPosition: CameraPosition(
+                  target: startCoordinates,
+                  zoom: 15.0,
                 ),
-              ],
+                markers: {
+                  Marker(
+                    markerId: const MarkerId('start'),
+                    position: startCoordinates,
+                    infoWindow: const InfoWindow(title: 'Inicio del viaje'),
+                  ),
+                  Marker(
+                    markerId: const MarkerId('destination'),
+                    position: destinationCoordinates,
+                    infoWindow: const InfoWindow(title: 'Destino del viaje'),
+                  ),
+                },
+              ),
             ),
           ],
         ),
