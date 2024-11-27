@@ -21,8 +21,10 @@ dependencies:
   flutter_launcher_icons: ^0.14.1
   permission_handler: ^11.3.1
   local_auth: ^2.3.0
-  
+
   shared_preferences: ^2.3.3
+
+  url_launcher: ^6.3.1
 
   cupertino_icons: ^1.0.8
 
@@ -36,7 +38,7 @@ dev_dependencies:
 flutter_icons:
   android: true
   ios: true
-  image_path: "assets/logoJasaiVOY.png"
+  image_path: "assets/logoJasaiVOY.jpg"
 
 flutter:
   uses-material-design: true

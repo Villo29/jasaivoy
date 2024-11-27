@@ -9,6 +9,7 @@ import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:jasaivoy/pages/models/user_model.dart' as userModel;
 import 'package:jasaivoy/pages/models/auth_model.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 void main() {
   runApp(const MyApp());
@@ -154,16 +155,10 @@ class _HomeScreenState extends State<HomeScreen> {
 // Botón que cambia dinámicamente
   Widget _buildDynamicButton() {
     if (_isDriverInfoAvailable && _driverInfo != null) {
-      // Botón que abre el modal con la información del conductor
-      return SizedBox(
-        width: double.infinity,
-        child: ElevatedButton(
-          onPressed: _showDriverInfoModal,
-          child: const Text('Ver Información del Conductor'),
-        ),
-      );
+      // Mostrar el botón dividido si hay información del conductor
+      return _buildSplitButton();
     } else {
-      // Botón original para solicitar el viaje
+      // Mostrar el botón original si no hay información del conductor
       return SizedBox(
         width: double.infinity,
         child: ElevatedButton(
@@ -222,14 +217,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _showTripSummary({
     required String message,
-    required int duration,
     required Map<String, dynamic> startDetails,
     required Map<String, dynamic> destinationDetails,
   }) {
     showDialog(
       context: context,
-      barrierDismissible:
-          false, // Obliga al usuario a interactuar con el diálogo
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Resumen del Viaje'),
@@ -238,9 +231,6 @@ class _HomeScreenState extends State<HomeScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(message, style: const TextStyle(fontSize: 16)),
-              const SizedBox(height: 8),
-              Text('Duración: $duration minutos',
-                  style: const TextStyle(fontSize: 16)),
               const SizedBox(height: 8),
               Text(
                 'Inicio:',
@@ -324,7 +314,6 @@ class _HomeScreenState extends State<HomeScreen> {
       // Mostrar un resumen del viaje y restablecer el estado
       _showTripSummary(
         message: data['message'],
-        duration: data['duration'],
         startDetails: data['details']['start'],
         destinationDetails: data['details']['destination'],
       );
@@ -334,6 +323,54 @@ class _HomeScreenState extends State<HomeScreen> {
     socket.onDisconnect((_) {
       print('Disconnected from WebSocket server');
     });
+  }
+
+  Widget _buildSplitButton() {
+    return SizedBox(
+      width: double.infinity,
+      height: 50, // Altura del botón
+      child: Row(
+        children: [
+          Expanded(
+            child: ElevatedButton(
+              onPressed:
+                  _showDriverInfoModal, // Acción para "Información del Conductor"
+              style: ElevatedButton.styleFrom(
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(10),
+                    bottomLeft: Radius.circular(10),
+                  ),
+                ),
+              ),
+              child: const Text(
+                'Información del Conductor',
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+          Expanded(
+            child: ElevatedButton(
+                onPressed: _callEmergency,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.only(
+                    topRight: Radius.circular(10),
+                    bottomRight: Radius.circular(10),
+                  ),
+                ),
+              ),
+              child: const Text(
+                'SOS',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _setMarkerAndAddress(
@@ -515,18 +552,13 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void _handleEmergency() {
-    socket.emit('emergency', {
-      'passengerId': user!.id,
-      'location': {
-        'latitude': _startLatLng!.latitude,
-        'longitude': _startLatLng!.longitude,
-      },
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('¡Emergencia notificada!')),
-    );
+  void _callEmergency() async {
+    const phoneNumber = 'tel:911';
+    if (await canLaunch(phoneNumber)) {
+      await launch(phoneNumber);
+    } else {
+      throw 'No se pudo iniciar la llamada al $phoneNumber';
+    }
   }
 
   @override
@@ -646,21 +678,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 16),
             if (_startLatLng != null && _destinationLatLng != null)
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _isDriverInfoAvailable
-                      ? _showDriverInfoModal // Si hay información del conductor, muestra el modal
-                      : (_isRequestingRide
-                          ? null
-                          : _requestRide), // De lo contrario, solicita un viaje
-                  child: _isDriverInfoAvailable
-                      ? const Text('Ver Información del Conductor')
-                      : (_isRequestingRide
-                          ? const CircularProgressIndicator(color: Colors.white)
-                          : const Text('Solicitar Viaje')),
-                ),
-              ),
+              _buildDynamicButton(),
           ],
         ),
       ),
