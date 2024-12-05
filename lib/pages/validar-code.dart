@@ -58,7 +58,7 @@ class VerificationScreen extends StatelessWidget {
                   }
                 } catch (e) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Código o correo incorrecto: $e')),
+                    SnackBar(content: Text('Código o correo incorrecto')),
                   );
                 }
               },

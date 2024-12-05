@@ -21,7 +21,7 @@ class ProfileScreen extends StatelessWidget {
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error en la autenticación: $e')),
+        SnackBar(content: Text('Error en la autenticación:')),
       );
       return;
     }

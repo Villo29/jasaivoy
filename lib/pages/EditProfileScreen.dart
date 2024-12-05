@@ -55,7 +55,7 @@ Future<void> _saveProfile() async {
     Navigator.pop(context); // Volver a la pantalla anterior
   } catch (error) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Error al actualizar el perfil: $error')),
+      SnackBar(content: Text('Error interno del servidor')),
     );
   }
 }

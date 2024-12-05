@@ -35,8 +35,10 @@
 	<string>Esta aplicación necesita acceso constante a tu ubicación para mejorar la experiencia incluso cuando esté en segundo plano.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Esta aplicación necesita acceder a tu ubicación mientras la usas para proporcionar servicios basados en ubicación.</string>
-	<key>UIApplicationSupportsIndirectInputEvents</key>
-	<true/>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Esta aplicación necesita acceso a tu galería para seleccionar fotos.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Esta aplicación necesita acceso para guardar imágenes en tu galería.</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
@@ -54,5 +56,7 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<true/>
 </dict>
 </plist>

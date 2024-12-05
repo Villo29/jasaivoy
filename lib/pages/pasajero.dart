@@ -6,7 +6,6 @@ import 'package:permission_handler/permission_handler.dart';
 import 'dart:convert';
 import 'JasaiVoyViajes.dart';
 
-
 class PassengerRegistrationScreen extends StatefulWidget {
   const PassengerRegistrationScreen({super.key});
 
@@ -51,7 +50,8 @@ class _PassengerRegistrationScreenState
     final status = await Permission.storage.request();
     if (status.isDenied) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Por favor, otorga permisos de almacenamiento')),
+        const SnackBar(
+            content: Text('Por favor, otorga permisos de almacenamiento')),
       );
     } else if (status.isPermanentlyDenied) {
       openAppSettings();
@@ -69,7 +69,65 @@ class _PassengerRegistrationScreenState
         contrasena.isNotEmpty &&
         telefono.isNotEmpty &&
         _selectedImage != null) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        },
+      );
+
       try {
+        // Lista de campos a analizar
+        final Map<String, String> fields = {
+          'Nombre': nombre,
+          'Correo': correo,
+          'Teléfono': telefono,
+        };
+        for (final entry in fields.entries) {
+          final analyzeUri = Uri.parse('http://35.175.159.211:5000/analyze');
+          final analyzeResponse = await http.post(
+            analyzeUri,
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({'message': entry.value}),
+          );
+
+          if (analyzeResponse.statusCode == 200) {
+            final analyzeResult = jsonDecode(analyzeResponse.body);
+
+            if (analyzeResult.containsKey('obscenas') &&
+                analyzeResult['obscenas'] != null) {
+              final int obscenas = analyzeResult['obscenas'];
+
+              if (obscenas >= 3) {
+                Navigator.of(context).pop();
+                _showAlert(
+                  title: 'Error en el campo',
+                  message:
+                      'Se detectaron palabras inapropiadas en el campo: ${entry.key}.',
+                );
+                return;
+              }
+            } else {
+              Navigator.of(context).pop();
+              _showAlert(
+                title: 'Error al analizar',
+                message:
+                    'Error inesperado al analizar el texto del campo: ${entry.key}.',
+              );
+              return; // Detener el registro
+            }
+          } else {
+            Navigator.of(context).pop(); // Cerrar el diálogo de carga
+            throw Exception(
+                'Error al analizar el texto: ${analyzeResponse.statusCode}');
+          }
+        }
+
+        // Paso 2: Registrar al usuario si pasa el análisis
+        Navigator.of(context).pop(); // Cerrar el diálogo de carga
         final uri = Uri.parse('http://35.175.159.211:3028/api/v1/users');
         final request = http.MultipartRequest('POST', uri);
 
@@ -79,17 +137,18 @@ class _PassengerRegistrationScreenState
         request.fields['contrasena'] = contrasena;
         request.fields['telefono'] = telefono;
 
-        // Archivo
-        request.files.add(
-          await http.MultipartFile.fromPath('imagenPath', _selectedImage!.path),
-        );
+        request.files.add(await http.MultipartFile.fromPath(
+          'imagenPath',
+          _selectedImage!.path,
+        ));
 
-        // Enviar solicitud
         final response = await request.send();
 
         if (response.statusCode == 200 || response.statusCode == 201) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Registro exitoso')),
+          _showAlert(
+            title: 'Registro Exitoso',
+            message: 'Tu registro fue completado con éxito.',
+            isSuccess: true,
           );
 
           Navigator.pushReplacement(
@@ -98,20 +157,59 @@ class _PassengerRegistrationScreenState
           );
         } else {
           final responseBody = await response.stream.bytesToString();
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error en el registro: $responseBody')),
+          _showAlert(
+            title: 'Error en el registro',
+            message: 'Error al registrar al usuario: $responseBody.',
           );
         }
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error en la conexión: $e')),
+        Navigator.of(context).pop(); // Cerrar el diálogo de carga
+        _showAlert(
+          title: 'Error en la conexión',
+          message: 'Ocurrió un error al conectar con el servidor:',
         );
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Todos los campos son obligatorios')),
+      _showAlert(
+        title: 'Campos incompletos',
+        message:
+            'Todos los campos son obligatorios. Por favor, completa la información.',
       );
     }
+  }
+
+// Método para mostrar un AlertDialog
+  void _showAlert({
+    required String title,
+    required String message,
+    bool isSuccess = false,
+  }) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Row(
+            children: [
+              Icon(
+                isSuccess ? Icons.check_circle : Icons.error,
+                color: isSuccess ? Colors.green : Colors.red,
+              ),
+              const SizedBox(width: 8),
+              Text(title),
+            ],
+          ),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Aceptar'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -227,7 +325,9 @@ class _PassengerRegistrationScreenState
                   ),
                   suffixIcon: IconButton(
                     icon: Icon(
-                      _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                      _isPasswordVisible
+                          ? Icons.visibility
+                          : Icons.visibility_off,
                     ),
                     onPressed: () {
                       setState(() {
@@ -244,7 +344,8 @@ class _PassengerRegistrationScreenState
                 decoration: InputDecoration(
                   prefixIcon: const Padding(
                     padding: EdgeInsets.all(10.0),
-                    child: Icon(Icons.phone, color: Color.fromARGB(255, 255, 12, 12)),
+                    child: Icon(Icons.phone,
+                        color: Color.fromARGB(255, 255, 12, 12)),
                   ),
                   labelText: 'Teléfono',
                   border: OutlineInputBorder(

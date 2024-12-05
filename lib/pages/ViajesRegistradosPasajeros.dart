@@ -30,7 +30,7 @@ class _ViajesRegistradosScreenState extends State<ViajesRegistradosScreen> {
         isLoading = false;
       });
     } catch (e) {
-      print('Error al cargar los viajes: $e');
+      print('Error al cargar los viajes:');
       setState(() {
         isLoading = false;
       });

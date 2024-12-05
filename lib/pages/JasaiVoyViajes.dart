@@ -4,6 +4,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:http/http.dart' as http;
 import 'package:jasaivoy/pages/InformacionPasajeros.dart';
+import 'package:jasaivoy/pages/estadisticasviajaes.dart';
 import 'package:jasaivoy/pages/ViajesRegistradosPasajeros.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:jasaivoy/pages/models/user_model.dart' as userModel;
@@ -516,7 +517,7 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
+        SnackBar(content: Text('Error interno del servidor')),
       );
     } finally {
       setState(() {
@@ -715,7 +716,7 @@ class _HomeScreenState extends State<HomeScreen> {
           if (index == 0) {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const GraphScreen()),
+              MaterialPageRoute(builder: (context) => GraphPage()),
             );
           } else if (index == 1) {
             Navigator.push(
@@ -742,19 +743,3 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class GraphScreen extends StatelessWidget {
-  const GraphScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Graficas'),
-        backgroundColor: Colors.green,
-      ),
-      body: const Center(
-        child: Text('Pantalla de Graficas'),
-      ),
-    );
-  }
-}

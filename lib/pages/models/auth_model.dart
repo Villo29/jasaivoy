@@ -162,7 +162,7 @@ class AuthModel extends ChangeNotifier {
             'Error al actualizar el perfil: ${response.statusCode} - ${response.body}');
       }
     } catch (error) {
-      throw Exception('Error al realizar la petición: $error');
+      throw Exception('Error al realizar la petición:');
     }
   }
 
@@ -199,7 +199,7 @@ class AuthModel extends ChangeNotifier {
             'Error al obtener los datos del usuario: ${response.statusCode} - ${response.body}');
       }
     } catch (error) {
-      throw Exception('Error al realizar la petición: $error');
+      throw Exception('Error al realizar la petición:');
     }
   }
 
@@ -229,7 +229,7 @@ class AuthModel extends ChangeNotifier {
             'Error al obtener los viajes: ${response.statusCode} - ${response.body}');
       }
     } catch (error) {
-      throw Exception('Error en la solicitud de viajes: $error');
+      throw Exception('Error en la solicitud de viajes:');
     }
   }
 }
